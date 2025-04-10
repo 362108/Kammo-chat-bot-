@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Kammo - Your Chat Buddy</title>
+  <style>
+    body { font-family: sans-serif; background: #f3f3f3; padding: 20px; }
+    #chat { height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background: white; }
+    .message { margin-bottom: 10px; }
+    .user { font-weight: bold; color: blue; }
+    .bot { color: green; }
+  </style>
+</head>
+<body>
+  <h2>Kammo says hi!</h2>
+  <div id="chat"></div>
+  <input id="input" type="text" placeholder="Type your message..." style="width: 80%;" />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    const chatBox = document.getElementById('chat');
+    const input = document.getElementById('input');
+
+    async function sendMessage() {
+      const userText = input.value;
+      if (!userText.trim()) return;
+
+      showMessage("You", userText, "user");
+      input.value = "";
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer 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"
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: "You are Kammo, a friendly desi chatbot." },
+            { role: "user", content: userText }
+          ]
+        })
+      });
+
+      const data = await response.json();
+      const botReply = data.choices[0].message.content;
+      showMessage("Kammo", botReply, "bot");
+    }
+
+    function showMessage(sender, text, className) {
+      const msg = document.createElement('div');
+      msg.className = "message " + className;
+      msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+</body>
+</html>
